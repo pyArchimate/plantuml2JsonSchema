@@ -1,3 +1,4 @@
 lark-parser
 pytest
+regex
 

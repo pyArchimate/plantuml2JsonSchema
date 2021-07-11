@@ -1,0 +1,25 @@
+@startuml
+
+class itpc.itSolution as "IT Solution" {          /' IT Solution '/
+	+uuid: uuid
+	+name: string
+	-productCode: string        /' ACE Purpose immutable and unique - is a readable alias of uuid '/
+	+acronym: string            /' IT Solution acronym (short name) '/
+	+description: string        /' IT Solution long description '/
+	+status: enum
+	+category: enum             /' see details below '/
+	+subCategory: enum
+	-teamCode: string           /' FK ACE Team code '/
+	+teamName: string           /' derived from ACE Team '/
+	-tribeUuid: uuid            /' FK to tribe '/
+	-legalEntityUuid: string    /' FK derived from Asset Owner HR data '/
+	-domainUuid: string         /' FK derived from ACE Teams attribute '/
+	-itRiskEntityUuid: string   /' FK to ITRMP '/
+	+parentUuid: uuid           /' FK parent IT Product - defines the hierarchy between IT Products '/
+	-assetOwner: string         /' FK CorpKey '/
+	-itCustodian: string        /' FK CorpKey '/
+	-productOwner: string       /' FK CorpKey '/
+	-architect: string          /' FK CorpKey '/
+}
+
+@enduml

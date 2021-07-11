@@ -1,17 +1,32 @@
-start: "@startuml" (skinparam | class | relationship)* "@enduml"
+start: "@startuml" (_skinparam | package | _class | relationship | enum | comment)* "@enduml"
 
-// Skinparam
-skinparam: "skinparam" sparam svalue
+// _Skinparam
+_skinparam: "skinparam" sparam svalue
+         | "hide" sparam
+         | "show" sparam
+
+// Comment
+comment: "'" /\s+.*/
+        | "/'" /\s+[\d\w:\-$!?"#&%()+,.\/;<=>@\^_`{}|~\[\] \n]*/ "'/"
+
+// Package
+package: "package" CNAME ("as" alias)? "{" (_class | enum | relationship | comment | note)* "}"
 
 // Classes
-class: "class" class_name stereotype? ("{" (class_group_title? (attribute | method) class_group_title?)* "}")?
-     | class_name ":" (attribute | method)?
+_class: "class" class_name ("as" alias)? stereotype? ("{" (comment? _class_group_title? (attribute | method) _class_group_title?)* "}")?
+     | class_name ":" (attribute | method)? comment?
+
+// alias
+alias: /"[a-zA-Z0-9-_() ]*"/
+
+//Enum
+enum: "enum" class_name ("{" (comment? CNAME)+ "}")?
 
 // Stereotype
 stereotype: "<<" stereotype_name ">>"
 
 // Sections with title
-class_group_title: ".." (group_title "..")?
+_class_group_title: ".." (group_title "..")?
                  | "--" (group_title "--")?
                  | "__" (group_title "__")?
                  | "=="
@@ -28,10 +43,10 @@ variable: var ":" type
 
 text_field: "{field}" field_text
 
-?attribute: att_scope? visibility? variable
-          | visibility? att_scope? variable
-          | att_scope? visibility? text_field
-          | visibility? att_scope? text_field
+?attribute: att_scope? visibility? variable comment?
+          | visibility? att_scope? variable comment?
+          | att_scope? visibility? text_field comment?
+          | visibility? att_scope? text_field comment?
 
 param_list: [variable ("," variable)*]
 
@@ -50,7 +65,7 @@ att_scope: "{static}" -> static
          | "{abstract}" -> abstract
 
 // Relationships
-relationship: arrow_end_1 cardinality? arrow_head_1 arrow_body arrow_head_2 cardinality? arrow_end_2 [":" relation_text]
+relationship: arrow_end_1? cardinality? arrow_head_1? arrow_body arrow_head_2? cardinality? arrow_end_2? [":" relation_text] comment?
 
 // Arrow Heads
 !arrow_head_1: "<"
@@ -71,7 +86,7 @@ relationship: arrow_end_1 cardinality? arrow_head_1 arrow_body arrow_head_2 card
              | "+"
              | "#"
              | "x"
-             | "}"
+             | "{"
              | "^"
              | " "
 
@@ -91,6 +106,10 @@ relationship: arrow_end_1 cardinality? arrow_head_1 arrow_body arrow_head_2 card
 
 cardinality: ESCAPED_STRING
 
+// Note
+note: "note" ("as" CNAME)? /.+/ "end note"
+
+
 // Variables and Methods visibility
 visibility: "+" -> public
           | "-" -> private
@@ -106,11 +125,12 @@ svalue: CNAME|WORD|ESCAPED_STRING|DIGIT
 attribute_name: CNAME
 method_name: CNAME
 class_name: CNAME
+          | CNAME "." CNAME
 stereotype_name: CNAME
 relation_text: (WORD|ESCAPED_STRING|DIGIT|">"|"<")*
 field_text: (WORD|ESCAPED_STRING|DIGIT)*
 method_text: (WORD|ESCAPED_STRING|DIGIT)*
-class_mem_text: (WORD|ESCAPED_STRING|DIGIT)*
+_class_mem_text: (WORD|ESCAPED_STRING|DIGIT)*
 group_title: (WORD|ESCAPED_STRING|DIGIT)*
 
 %import common.CNAME
@@ -119,3 +139,4 @@ group_title: (WORD|ESCAPED_STRING|DIGIT)*
 %import common.DIGIT
 %import common.WS
 %ignore WS
+

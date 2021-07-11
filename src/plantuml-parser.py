@@ -1,5 +1,5 @@
 # Copyright 2018 Pedro Cuadra - pjcuadra@gmail.com
-#
+# https://github.com/pjcuadra/plantuml-parser
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,10 +11,76 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+#
+#    see: https://lark-parser.readthedocs.io/_/downloads/en/latest/pdf/
+#
+
+
 import logging
 from lark import Lark
 from sys import argv
 import os
+from lark import Transformer
+
+
+class Trsf(Transformer):
+
+    def __init__(self):
+        super().__init__()
+        self.cl_name = {}
+        self.cl_attr = []
+
+    def var(self, s):
+        (s,) = s
+        return s[:]
+
+    def type(self, s):
+        (s,) = s
+        return s[:]
+
+    def variable(self, s):
+        self.cl_attr.append({s[0]: {"type": s[1]}})
+        return {s[0]:s[1]}
+
+    def attribute(self, s):
+
+        return s[1]
+
+    def class_name(self, s):
+        self.cl_name = {"class": {
+            "name": '.'.join([s[0][:],s[1][:]])},
+            "properties": self.cl_attr}
+        return {"class": '.'.join([s[0][:],s[1][:]])}
+
+    def comment(self, s):
+        (s,) = s
+        return {"description": s[:]}
+
+    def _class(self,s):
+        return s
+
+    def package(self, s):
+        return
+
+    def alias(self, s):
+        return
+
+    null = lambda self, _: None
+    true = lambda self, _: True
+    false = lambda self, _: False
+
+    start = list
+
+
+class TreeToJson(Transformer):
+    def var(self, s):
+        (s,) = s
+        return s[1:-1]
+
+    def number(self, n):
+        (n,) = n
+        return float(n)
 
 
 def getopts(argv):
@@ -51,4 +117,10 @@ if __name__ == '__main__':
     if '-v' in myargs:
         logging.basicConfig(level=logging.INFO)
 
-    print(parser.parse(f.read()))
+    tree = parser.parse(f.read())
+    print(tree.pretty())
+    tr = Trsf()
+    tree1 = tr.transform(tree)
+
+    print(tr.cl_name)
+
