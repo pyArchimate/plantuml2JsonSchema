@@ -1,8 +1,9 @@
 @startuml
 
+
 class architecture.framework {              /' Achitecture framework '/
     +uuid: uuid
-    +name: name                             /' Name of the architecture framework LAA | GTA | IBF '/
+    +name: name                             /' Name of the architecture framework LAA | GTA | IBF'/
 }
 
 class architecture.capability {             /'  Architecture capability '/
@@ -43,6 +44,12 @@ enum architecture.status {                  /' List of possible architecture sta
     DECOMMISSIONED
     DISPOSED
 }
+
+
+architecture.itProductInfo - architecture.status                /' An IT Product has architecture status '/
+architecture.framework -up-{ architecture.capability            /' An architecture framework has capabilities '/
+architecture.capability -{ architecture.capability: hierarchy   /' Architecture capabilities have hierarchy '/
+architecture.itProductInfo --{ architecture.capability          /' An IT Product servers architecture capabilities '/
 
 
 @enduml

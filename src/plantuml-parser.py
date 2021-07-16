@@ -18,11 +18,13 @@
 
 
 import logging
+import sys
+
 from lark import Lark
 from sys import argv
 import os
 from lark import Transformer
-
+import json
 
 class Trsf(Transformer):
 
@@ -114,9 +116,14 @@ def getopts(argv):
 if __name__ == '__main__':
     myargs = getopts(argv)
 
-    dir_path = os.getenv('USERPROFILE')
-    # dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.dirname(os.path.realpath(__file__))
     grammar_file_path = os.path.join(dir_path, "grammar", "grammar.ebnf")
+    if not os.path.exists(grammar_file_path):
+        dir_path = os.getenv('USERPROFILE')
+        grammar_file_path = os.path.join(dir_path, "grammar", "grammar.ebnf")
+    if not os.path.exists(grammar_file_path):
+        print(f"Error: file {grammar_file_path} does not exist", file=sys.stderr)
+
     f = open(grammar_file_path)
 
     parser = Lark(f.read())
@@ -136,5 +143,5 @@ if __name__ == '__main__':
     # print(yaml.dump(tr.cl))
     tr.classes.append(tr.cl)
     tr.classes.pop(0)
-    print(tr.classes)
+    print(json.dumps(tr.classes))
 

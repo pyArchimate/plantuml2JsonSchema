@@ -6,7 +6,8 @@ _skinparam: "skinparam" sparam svalue
          | "show" sparam
 
 // Comments
-comment: "'" /\s+.*/
+comment: "'" /\s+[\d\w:\-$!?"#&%()+,.\/;<=>@\^_`{}|~\[\] ]*/
+        | "'\n"
 bcomment:"/'" /\s+[\d\w:\-$!?"#&%()+,.\/;<=>@\^_`{}|~\[\] \n]*/ "'/\n"
 ccomment:"/'" /\s+[\d\w:\-$!?"#&%()+,.\/;<=>@\^_`{}|~\[\] \n]*/ "'/\n"
 
@@ -70,7 +71,11 @@ att_scope: "{static}" -> static
          | "{abstract}" -> abstract
 
 // Relationships
-relationship: arrow_end_1? cardinality? arrow_head_1? arrow_body arrow_head_2? cardinality? arrow_end_2? [":" relation_text] bcomment?
+relationship: arrow_end_1? cardinality? arrow_head_1? arrow_body arrow_head_2? cardinality? arrow_end_2? [":" relation_text]
+
+relation: class_name relationship class_name bcomment?
+
+
 
 // Arrow Heads
 !arrow_head_1: "<"
