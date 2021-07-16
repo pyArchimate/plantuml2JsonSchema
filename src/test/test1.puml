@@ -1,25 +1,48 @@
 @startuml
 
-class itpc.itSolution as "IT Solution" {          /' IT Solution '/
-	+uuid: uuid
-	+name: string
-	-productCode: string        /' ACE Purpose immutable and unique - is a readable alias of uuid '/
-	+acronym: string            /' IT Solution acronym (short name) '/
-	+description: string        /' IT Solution long description '/
-	+status: enum
-	+category: enum             /' see details below '/
-	+subCategory: enum
-	-teamCode: string           /' FK ACE Team code '/
-	+teamName: string           /' derived from ACE Team '/
-	-tribeUuid: uuid            /' FK to tribe '/
-	-legalEntityUuid: string    /' FK derived from Asset Owner HR data '/
-	-domainUuid: string         /' FK derived from ACE Teams attribute '/
-	-itRiskEntityUuid: string   /' FK to ITRMP '/
-	+parentUuid: uuid           /' FK parent IT Product - defines the hierarchy between IT Products '/
-	-assetOwner: string         /' FK CorpKey '/
-	-itCustodian: string        /' FK CorpKey '/
-	-productOwner: string       /' FK CorpKey '/
-	-architect: string          /' FK CorpKey '/
+class architecture.framework {              /' Achitecture framework '/
+    +uuid: uuid
+    +name: name                             /' Name of the architecture framework LAA | GTA | IBF '/
 }
+
+class architecture.capability {             /'  Architecture capability '/
+    +uuid: uuid
+    +name: string                           /' name of the architecture capability '/
+    +description: string                    /' full description and context info '/
+    +level: integer                         /' hierarchical level of the  capability - derived from outline nr '/
+    +outline:string                         /' outline number e.g. 2.3.3 for a level 3 capability '/
+    +parentCapability: uuid                 /' parent capability at level-1 - derived from outline nr '/
+    +frameworkUuid: uuid                    /' reference to the framework the capability belogs to '/
+}
+
+class architecture.capabilities {
+    +uuid: uuid                             /' uuid of the capability associated with the IT SOlution '/
+    +name: string                           /' name of the capability associated with the IT SOlution '/
+    +isPrimary: boolean                     /' indicate if the capability primarily serves the IT Solution '/
+}
+
+class architecture.itProductInfo {          /' Specific attributes of an IT Product wrt Architecture '/
+    +uuid: uuid
+    +status: enum                           /' architecture status '/
+    +ambitionDecommissionDate: long         /' Decommission date (millis UTC) '/
+    +committedDecommissionDate: long        /' Committed date (millis UTC) '/
+    +decommissionDecisions: string          /' description/reference to the  decommission decision '/
+    +itProductUuid: uuid                    /' reference to the IT Product '/
+    +architectureCapabilities: object[]   /' array of architecture capability uuid served by the IT Product '/
+    +PrimaryCapabilityUuid: uuid             /' uuid of the primary architecture capability '/
+}
+
+' to be changed !
+enum architecture.status {                  /' List of possible architecture status '/
+    PROPOSED
+    DEFINED
+    IN_IMPLEMENTATION
+    OPERATIONAL
+    CONTAINED
+    MAINTAINED_TARGET
+    DECOMMISSIONED
+    DISPOSED
+}
+
 
 @enduml

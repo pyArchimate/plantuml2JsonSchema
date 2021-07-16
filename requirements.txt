@@ -1,4 +1,4 @@
 lark-parser
 pytest
-regex
-
+oyaml
+pyinstaller

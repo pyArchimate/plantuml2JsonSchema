@@ -29,7 +29,16 @@ class Trsf(Transformer):
     def __init__(self):
         super().__init__()
         self.cl_name = {}
-        self.cl_attr = []
+        self.cl_doc = ''
+        self.cl_attr = {}
+        self.cl = {}
+        self.classes = []
+
+    def new_cl(self):
+        self.cl_name = {}
+        self.cl_doc = ''
+        self.cl_attr = {}
+        self.cl = {}
 
     def var(self, s):
         (s,) = s
@@ -40,24 +49,36 @@ class Trsf(Transformer):
         return s[:]
 
     def variable(self, s):
-        self.cl_attr.append({s[0]: {"type": s[1]}})
-        return {s[0]:s[1]}
+        return (s[0],s[1])
 
     def attribute(self, s):
-
+        doc = s[2] if (len(s) > 2) else ''
+        self.cl_attr[s[1][0]] = {"type": s[1][1], "description": doc}
+        self.cl = {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": self.cl_name,
+            "type": "object",
+            "description": self.cl_doc,
+            "properties": self.cl_attr
+        }
         return s[1]
 
     def class_name(self, s):
-        self.cl_name = {"class": {
-            "name": '.'.join([s[0][:],s[1][:]])},
-            "properties": self.cl_attr}
-        return {"class": '.'.join([s[0][:],s[1][:]])}
+        self.classes.append(self.cl)
+        self.new_cl()
+        self.cl_name = '.'.join([s[0][:],s[1][:]])
+        return {"class": self.cl_name}
 
-    def comment(self, s):
+    def bcomment(self, s):
         (s,) = s
-        return {"description": s[:]}
+        return s[:].strip()
 
-    def _class(self,s):
+    def ccomment(self, s):
+        (s,) = s
+        self.cl_doc = s[:].strip()
+        return s[:].strip()
+
+    def _class(self, s):
         return s
 
     def package(self, s):
@@ -71,16 +92,6 @@ class Trsf(Transformer):
     false = lambda self, _: False
 
     start = list
-
-
-class TreeToJson(Transformer):
-    def var(self, s):
-        (s,) = s
-        return s[1:-1]
-
-    def number(self, n):
-        (n,) = n
-        return float(n)
 
 
 def getopts(argv):
@@ -103,7 +114,8 @@ def getopts(argv):
 if __name__ == '__main__':
     myargs = getopts(argv)
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.getenv('USERPROFILE')
+    # dir_path = os.path.dirname(os.path.realpath(__file__))
     grammar_file_path = os.path.join(dir_path, "grammar", "grammar.ebnf")
     f = open(grammar_file_path)
 
@@ -118,9 +130,11 @@ if __name__ == '__main__':
         logging.basicConfig(level=logging.INFO)
 
     tree = parser.parse(f.read())
-    print(tree.pretty())
+    # print(tree.pretty())
     tr = Trsf()
     tree1 = tr.transform(tree)
-
-    print(tr.cl_name)
+    # print(yaml.dump(tr.cl))
+    tr.classes.append(tr.cl)
+    tr.classes.pop(0)
+    print(tr.classes)
 

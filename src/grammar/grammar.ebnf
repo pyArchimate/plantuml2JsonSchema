@@ -1,26 +1,31 @@
-start: "@startuml" (_skinparam | package | _class | relationship | enum | comment)* "@enduml"
+start: "@startuml" (_skinparam | package | _class | relationship | enum | comment )* "@enduml"
 
 // _Skinparam
 _skinparam: "skinparam" sparam svalue
          | "hide" sparam
          | "show" sparam
 
-// Comment
+// Comments
 comment: "'" /\s+.*/
-        | "/'" /\s+[\d\w:\-$!?"#&%()+,.\/;<=>@\^_`{}|~\[\] \n]*/ "'/"
+bcomment:"/'" /\s+[\d\w:\-$!?"#&%()+,.\/;<=>@\^_`{}|~\[\] \n]*/ "'/\n"
+ccomment:"/'" /\s+[\d\w:\-$!?"#&%()+,.\/;<=>@\^_`{}|~\[\] \n]*/ "'/\n"
 
 // Package
-package: "package" CNAME ("as" alias)? "{" (_class | enum | relationship | comment | note)* "}"
+package: "package" CNAME ("as" alias)? "{" (_class | enum | relationship | bcomment | note)* "}"
 
 // Classes
-_class: "class" class_name ("as" alias)? stereotype? ("{" (comment? _class_group_title? (attribute | method) _class_group_title?)* "}")?
-     | class_name ":" (attribute | method)? comment?
+_class: "class" class_name ("as" alias)? stereotype? ("{" ccomment? ( _class_group_title? (attribute | method) _class_group_title?)* "}")?
+     | class_name ":" (attribute | method)? bcomment?
 
 // alias
 alias: /"[a-zA-Z0-9-_() ]*"/
 
+
+// Enum symbol
+symbol: CNAME
+
 //Enum
-enum: "enum" class_name ("{" (comment? CNAME)+ "}")?
+enum: "enum" class_name ("{" bcomment? (symbol)+ "}")?
 
 // Stereotype
 stereotype: "<<" stereotype_name ">>"
@@ -43,10 +48,10 @@ variable: var ":" type
 
 text_field: "{field}" field_text
 
-?attribute: att_scope? visibility? variable comment?
-          | visibility? att_scope? variable comment?
-          | att_scope? visibility? text_field comment?
-          | visibility? att_scope? text_field comment?
+?attribute: att_scope? visibility? variable bcomment?
+          | visibility? att_scope? variable bcomment?
+          | att_scope? visibility? text_field bcomment?
+          | visibility? att_scope? text_field bcomment?
 
 param_list: [variable ("," variable)*]
 
@@ -65,7 +70,7 @@ att_scope: "{static}" -> static
          | "{abstract}" -> abstract
 
 // Relationships
-relationship: arrow_end_1? cardinality? arrow_head_1? arrow_body arrow_head_2? cardinality? arrow_end_2? [":" relation_text] comment?
+relationship: arrow_end_1? cardinality? arrow_head_1? arrow_body arrow_head_2? cardinality? arrow_end_2? [":" relation_text] bcomment?
 
 // Arrow Heads
 !arrow_head_1: "<"
