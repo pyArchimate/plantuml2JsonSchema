@@ -1,4 +1,4 @@
-# PlatUML Parser
+# PlantUML Parser
 
 This is a Proof-of-Concept PlantUML parser. This is still WIP, and support is
 being added incrementally. PlantUML is being parsed using LARK and described in
